@@ -1,0 +1,29 @@
+---
+- hosts: Web
+  tasks:
+  - name: install the latest version of Apache
+    yum:
+      name: "{{ item }}"
+      state: latest
+    loop:
+     - httpd
+     - mariadb-server
+  - name: Copy configuration
+    copy:
+      src: /home/ec2-user/environment/Ansible-auto/httpd.conf
+      dest: /etc/httpd/conf/httpd.conf
+    notify: "restart apache"
+  - name: Copy code
+    copy:
+      src: /home/ec2-user/environment/Ansible-auto/index.html
+      dest: /var/www/html
+  - name: Start service httpd, if not started
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+  handlers:
+  - name: restart apache
+    service:
+      name: httpd
+      state: restarted
